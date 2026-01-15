@@ -54,12 +54,31 @@
                 loading.classList.add('hidden');
                 table.classList.remove('hidden');
 
-                players.forEach((p, index) => {
+                let rankCounter = 0;
+                let provisionalHeaderShown = false;
+
+                players.forEach((p) => {
                     const tr = document.createElement('tr');
+
+                    let rankDisplay;
+                    if (p.is_ranked) {
+                        rankCounter++;
+                        rankDisplay = rankCounter;
+                    } else {
+                        tr.classList.add('provisional');
+                        rankDisplay = '<span title="Punteggio Provvisorio (Troppe poche partite)">-</span>';
+                    }
+
                     tr.innerHTML = `
-                        <td class="rank-cell">${index + 1}</td>
-                        <td style="font-weight: 500">${p.name}</td>
-                        <td>${p.games_played}</td>
+                        <td class="rank-cell">${rankDisplay}</td>
+                        <td style="font-weight: 500">
+                            ${p.name} 
+                            ${!p.is_ranked ? `<span style="font-size: 0.75rem; opacity: 0.7; margin-left: 5px;">(Provvisorio)</span>` : ''}
+                        </td>
+                        <td>
+                            ${p.games_played} 
+                            ${!p.is_ranked ? `<span style="font-size: 0.7rem; color: var(--text-secondary); display: block;">Minimo: ${p.threshold}</span>` : ''}
+                        </td>
                         <td class="rating-cell">
                             ${formatRating(p.rating)}
                             <a href="player.html?id=${p.id}" style="float: right; color: var(--text-secondary); text-decoration: none; font-size: 0.8em">↗</a>

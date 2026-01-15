@@ -179,6 +179,15 @@ tr:hover td {
     margin-left: 0.5rem;
 }
 
+.provisional {
+    opacity: 0.5;
+    font-style: italic;
+    background: rgba(0, 0, 0, 0.2);
+}
+.provisional td {
+    color: var(--text-secondary);
+}
+
 /* Forms */
 .form-group {
     margin-bottom: 1.5rem;

@@ -168,8 +168,42 @@ class Database:
     
     def get_all_players(self) -> List[Dict[str, Any]]:
         cursor = self.conn.cursor()
-        cursor.execute("SELECT * FROM players ORDER BY rating DESC")
-        return [dict(row) for row in cursor.fetchall()]
+        cursor.execute("SELECT * FROM players")
+        players = [dict(row) for row in cursor.fetchall()]
+
+        if not players:
+            return []
+
+        # 1. Calculate Dynamic Threshold
+        max_games = max(p['games_played'] for p in players) if players else 0
+        
+        # Logic: At least 5 games. At least 20% of leader. Cap at 15 games.
+        # MIN(15, MAX(5, max_games * 0.20))
+        calculated_threshold = max(5, int(max_games * 0.20))
+        threshold = min(15, calculated_threshold)
+
+        # 2. Separate Ranked vs Provisional
+        ranked = []
+        provisional = []
+
+        for p in players:
+            p['is_ranked'] = p['games_played'] >= threshold
+            p['threshold'] = threshold # Pass this info to frontend
+            
+            if p['is_ranked']:
+                ranked.append(p)
+            else:
+                provisional.append(p)
+
+        # 3. Sort
+        # Ranked: By Rating DESC
+        ranked.sort(key=lambda x: x['rating'], reverse=True)
+        
+        # Provisional: By Rating DESC too (or games played? Usually rating is fine, just separated)
+        # Let's sort provisional by Rating too so they see where they "would" be
+        provisional.sort(key=lambda x: x['rating'], reverse=True)
+
+        return ranked + provisional
 
     # --- Matches ---
     def record_match(self, date: str, winner_id: str, loser_ids: List[str], winner_delta: float, winner_new_rating: float, losers_data: List[Dict]):
