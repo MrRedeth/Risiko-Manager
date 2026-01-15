@@ -88,6 +88,14 @@
                 </form>
             </div>
 
+            <!-- Manage Matches -->
+            <div class="card">
+                <h3>Gestione Partite</h3>
+                <div id="manage-matches-list" class="mt-4" style="max-height: 300px; overflow-y: auto;">
+                    <!-- Populated via JS -->
+                </div>
+            </div>
+
             <!-- Settings -->
             <div class="card">
                 <h3>Impostazioni Sistema</h3>
@@ -296,6 +304,71 @@
                     showToast(err.message, 'error');
                 }
             });
+
+            // Load matches for the management list
+            async function loadMatchesForAdmin() {
+                try {
+                    const matches = await fetchAPI('/matches'); // Reusing the public matches API
+                    const container = document.getElementById('manage-matches-list');
+                    container.innerHTML = '';
+
+                    if (matches.length === 0) {
+                        container.innerHTML = '<p style="color: var(--text-secondary); text-align: center;">Nessuna partita registrata</p>';
+                        return;
+                    }
+
+                    matches.forEach(m => {
+                        const div = document.createElement('div');
+                        div.className = 'flex-between';
+                        div.style.padding = '0.75rem';
+                        div.style.borderBottom = '1px solid var(--border)';
+
+                        // Format date nicely
+                        const dateObj = new Date(m.date);
+                        const dateStr = dateObj.toLocaleDateString('it-IT');
+
+                        div.innerHTML = `
+                            <div>
+                                <div style="font-weight: bold; color: var(--primary);">Data: ${dateStr}</div>
+                                <div style="font-size: 0.9rem; color: var(--text-secondary);">
+                                    <span style="color: var(--success);">🏆 ${m.winner_name}</span> vs ${m.losers_names}
+                                </div>
+                            </div>
+                            <button class="delete-match-btn" data-id="${m.id}" style="width: auto; padding: 0.5rem 1rem; background: var(--danger); font-size: 0.8rem;">Elimina</button>
+                        `;
+                        container.appendChild(div);
+                    });
+
+                    // Attach handlers
+                    document.querySelectorAll('.delete-match-btn').forEach(btn => {
+                        btn.addEventListener('click', async (e) => {
+                            const id = e.target.getAttribute('data-id');
+                            if (confirm('Attenzione: Cancellare questa partita ripristinerà i punteggi dei giocatori a prima della partita. Confermi?')) {
+                                try {
+                                    await fetchAPI(`/match/${id}`, {
+                                        method: 'DELETE',
+                                        headers: { 'X-Admin-Key': getAdminKey() }
+                                    });
+                                    showToast('Partita eliminata e punteggi ripristinati');
+                                    initDashboard(); // Reload everything
+                                } catch (err) {
+                                    showToast(err.message, 'error');
+                                }
+                            }
+                        });
+                    });
+
+                } catch (err) {
+                    console.error("Error loading matches", err);
+                }
+            }
+
+            // Hook into initDashboard to load matches too
+            const originalInit = initDashboard;
+            initDashboard = async function () {
+                await originalInit();
+                await loadMatchesForAdmin();
+            }
         });
     </script>
 </body>

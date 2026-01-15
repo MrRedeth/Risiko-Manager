@@ -129,6 +129,37 @@ class Database:
             self.conn.rollback()
             raise e
 
+    def delete_match(self, match_id: str):
+        """
+        Deletes a match and reverts the rating changes for all involved players.
+        """
+        try:
+            cursor = self.conn.cursor()
+            
+            # 1. Get participations to know what to reverse
+            cursor.execute("SELECT player_id, rating_delta FROM participations WHERE match_id = ?", (match_id,))
+            parts = cursor.fetchall()
+            
+            if not parts:
+                raise ValueError("Match not found")
+
+            # 2. Reverse ratings
+            for p in parts:
+                # Subtract the delta to revert. Decrease games_played.
+                cursor.execute("UPDATE players SET rating = rating - ?, games_played = games_played - 1 WHERE id = ?", 
+                               (p['rating_delta'], p['player_id']))
+
+            # 3. Delete from participations
+            cursor.execute("DELETE FROM participations WHERE match_id = ?", (match_id,))
+            
+            # 4. Delete from matches
+            cursor.execute("DELETE FROM matches WHERE id = ?", (match_id,))
+            
+            self.conn.commit()
+        except Exception as e:
+            self.conn.rollback()
+            raise e
+
     def get_player(self, player_id: str) -> Optional[Dict[str, Any]]:
         cursor = self.conn.cursor()
         cursor.execute("SELECT * FROM players WHERE id = ?", (player_id,))

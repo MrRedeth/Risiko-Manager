@@ -152,3 +152,12 @@ def create_match():
 
     except Exception as e:
         return jsonify({"error": str(e)}), 500
+
+@app.route('/api/match/<id>', methods=['DELETE'])
+def delete_match(id):
+    if request.headers.get('X-Admin-Key') != ADMIN_SECRET:
+        return jsonify({"error": "Unauthorized"}), 401
+    try:
+        db.delete_match(id)
+        return jsonify({"status": "deleted", "id": id})
+    except Exception as e: return jsonify({"error": str(e)}), 500
