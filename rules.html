@@ -1,0 +1,129 @@
+<!DOCTYPE html>
+<html lang="it">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Regolamento - Risiko Ranking</title>
+    <link rel="stylesheet" href="style.css">
+    <style>
+        .faq-item {
+            margin-bottom: 2rem;
+            border-bottom: 1px solid var(--border);
+            padding-bottom: 1rem;
+        }
+
+        .faq-item:last-child {
+            border-bottom: none;
+        }
+
+        .faq-question {
+            font-weight: 700;
+            color: var(--accent);
+            margin-bottom: 0.5rem;
+            font-size: 1.1rem;
+        }
+
+        .faq-answer {
+            color: var(--text-secondary);
+            line-height: 1.6;
+        }
+
+        .math-block {
+            background: rgba(0, 0, 0, 0.3);
+            padding: 1rem;
+            border-radius: 8px;
+            font-family: monospace;
+            margin: 1rem 0;
+            border-left: 3px solid var(--accent);
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container">
+        <header>
+            <h1>Come Funziona</h1>
+            <p class="subtitle">Trasparenza e Matematica</p>
+        </header>
+
+        <nav>
+            <a href="index.html">Classifica</a>
+            <a href="matches.html">Partite</a>
+            <a href="rules.html" class="active">Regolamento</a>
+            <a href="admin.html">Admin</a>
+        </nav>
+
+        <div class="card">
+            <h3>Il Sistema ELO</h3>
+            <p class="faq-answer" style="margin-bottom: 1rem;">
+                Questa classifica utilizza un sistema basato su <strong>ELO</strong>, lo standard internazionale per le
+                classifiche (usato negli scacchi e nei videogiochi competitivi).
+                L'obiettivo è premiare l'abilità reale nel lungo termine, non solo il numero di partite giocate.
+            </p>
+        </div>
+
+        <div class="card">
+            <h3>Domande Frequenti (FAQ)</h3>
+
+            <div class="faq-item">
+                <div class="faq-question">Come vengono calcolati i punteggi?</div>
+                <div class="faq-answer">
+                    Ogni partita di Risiko ha <strong>un solo vincitore</strong>. Matematicamente, il sistema considera
+                    la vittoria come se il vincitore avesse sconfitto singolarmente ogni altro partecipante in un 1
+                    contro 1.
+                    <br><br>
+                    Tutti gli altri giocatori sono considerati sconfitti allo stesso modo. Non c'è differenza tra
+                    arrivare secondi o ultimi.
+                </div>
+            </div>
+
+            <div class="faq-item">
+                <div class="faq-question">Perché ho perso molti punti in una partita?</div>
+                <div class="faq-answer">
+                    Il sistema valuta le aspettative.
+                    <ul>
+                        <li>Se hai un punteggio alto e perdi contro giocatori con punteggio basso, il sistema ti
+                            penalizza maggiormente perché "ti aspettavi di vincere".</li>
+                        <li>Se hai un punteggio basso e vinci contro giocatori forti, guadagni moltissimi punti per
+                            l'impresa.</li>
+                    </ul>
+                </div>
+            </div>
+
+            <div class="faq-item">
+                <div class="faq-question">Posso guadagnare punti solo giocando tanto?</div>
+                <div class="faq-answer">
+                    <strong>No.</strong> A differenza dei sistemi a punti cumulativi, qui puoi anche <em>perdere</em>
+                    punti se giochi male. Giocare tanto senza vincere farà scendere il tuo punteggio. Il sistema premia
+                    la <strong>percentuale di vittorie</strong> ponderata per la forza degli avversari.
+                </div>
+            </div>
+
+            <div class="faq-item">
+                <div class="faq-question">È possibile truccare la classifica?</div>
+                <div class="faq-answer">
+                    Il sistema è deterministico. L'unico dato inserito dall'amministratore è "X ha vinto la partita del
+                    giorno Y". Tutto il resto (i punti vinti/persi) è calcolato automaticamente da una formula
+                    matematica fissa. Non ci sono favoritismi manuali.
+                </div>
+            </div>
+
+            <div class="faq-item">
+                <div class="faq-question">Formula Matematica</div>
+                <div class="faq-answer">
+                    Per i più tecnici, ecco come funziona il calcolo:
+                    <div class="math-block">
+                        Delta = K * (RisultatoReale - RisultatoAtteso)<br>
+                        RisultatoAtteso = 1 / (1 + 10 ^ ((RatingAvversario - TuoRating) / 400))
+                    </div>
+                    Il fattore <strong>K</strong> determina la "velocità" con cui cambia la classifica. Attualmente è
+                    impostato per garantire stabilità ma permettere recuperi.
+                </div>
+            </div>
+
+        </div>
+    </div>
+</body>
+
+</html>

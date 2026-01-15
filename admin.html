@@ -1,0 +1,303 @@
+<!DOCTYPE html>
+<html lang="it">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin - Risiko Ranking</title>
+    <link rel="stylesheet" href="style.css">
+    <script src="app.js"></script>
+</head>
+
+<body>
+    <div class="container">
+        <header>
+            <h1>Amministrazione</h1>
+            <p class="subtitle">Gestione Giocatori e Partite</p>
+        </header>
+
+        <nav>
+            <a href="index.html">Classifica</a>
+            <a href="matches.html">Partite</a>
+            <a href="rules.html">Regolamento</a>
+            <a href="#" class="active">Admin</a>
+        </nav>
+
+        <!-- Login Section -->
+        <div id="login-section" class="card">
+            <h3>Accesso Richiesto</h3>
+            <p style="color: var(--text-secondary); margin-bottom: 1rem;">Inserisci la chiave di amministrazione.</p>
+            <form id="login-form">
+                <div class="form-group">
+                    <input type="password" id="admin-key" placeholder="Admin Key" required>
+                </div>
+                <button type="submit">Accedi</button>
+            </form>
+        </div>
+
+        <!-- Dashboard Section -->
+        <div id="dashboard-section" class="hidden">
+
+            <button id="logout-btn" style="background: rgba(255,255,255,0.1); margin-bottom: 2rem;">Disconnetti</button>
+
+            <!-- Manage Players -->
+            <div class="card">
+                <h3>Gestione Giocatori</h3>
+                <div id="manage-players-list" class="mt-4" style="max-height: 300px; overflow-y: auto;">
+                    <!-- Populated via JS -->
+                </div>
+            </div>
+
+            <!-- Create Player -->
+            <div class="card">
+                <h3>Nuovo Giocatore</h3>
+                <form id="create-player-form" class="mt-4">
+                    <div class="form-group">
+                        <label>Nome Giocatore</label>
+                        <input type="text" id="player-name" placeholder="Es. Mario Rossi" required>
+                    </div>
+                    <button type="submit">Crea Giocatore</button>
+                </form>
+            </div>
+
+            <!-- Record Match -->
+            <div class="card">
+                <h3>Registra Partita</h3>
+                <form id="record-match-form" class="mt-4">
+                    <div class="form-group">
+                        <label>Data</label>
+                        <input type="date" id="match-date" required>
+                    </div>
+
+                    <div class="form-group">
+                        <label>Vincitore</label>
+                        <select id="winner-select" required>
+                            <option value="">Seleziona Vincitore...</option>
+                        </select>
+                    </div>
+
+                    <div class="form-group">
+                        <label>Sconfitti (Seleziona multipli)</label>
+                        <div id="losers-list"
+                            style="max-height: 200px; overflow-y: auto; background: rgba(15, 23, 42, 0.6); padding: 1rem; border-radius: 8px; border: 1px solid var(--border);">
+                            <!-- Populated via JS -->
+                        </div>
+                    </div>
+
+                    <button type="submit">Registra e Calcola ELO</button>
+                </form>
+            </div>
+
+            <!-- Settings -->
+            <div class="card">
+                <h3>Impostazioni Sistema</h3>
+                <form id="settings-form" class="mt-4">
+                    <div class="form-group">
+                        <label>K-Factor (Attuale: <span id="current-k">...</span>)</label>
+                        <input type="number" id="k-factor" step="1" required>
+                    </div>
+                    <button type="submit" style="background: var(--text-secondary)">Aggiorna Impostazioni</button>
+                </form>
+            </div>
+
+        </div>
+    </div>
+
+    <script>
+        let allPlayers = [];
+
+        async function initDashboard() {
+            // Load Players
+            try {
+                allPlayers = await fetchAPI('/leaderboard');
+                populateForms(allPlayers);
+
+                // Load Settings
+                const settings = await fetchAPI('/settings');
+                document.getElementById('current-k').innerText = settings.k_factor;
+                document.getElementById('k-factor').value = settings.k_factor;
+
+            } catch (err) {
+                showToast(err.message, 'error');
+            }
+        }
+
+        function populateForms(players) {
+            const winnerSelect = document.getElementById('winner-select');
+            const losersList = document.getElementById('losers-list');
+
+            winnerSelect.innerHTML = '<option value="">Seleziona Vincitore...</option>';
+            losersList.innerHTML = '';
+
+            const manageList = document.getElementById('manage-players-list');
+            manageList.innerHTML = '';
+
+            players.sort((a, b) => a.name.localeCompare(b.name));
+
+            players.forEach(p => {
+                // Winner Opt
+                const opt = document.createElement('option');
+                opt.value = p.id;
+                opt.innerText = p.name;
+                winnerSelect.appendChild(opt);
+
+                // Loser Checkbox
+                const div = document.createElement('div');
+                div.style.marginBottom = '0.5rem';
+                div.innerHTML = `
+                    <label style="display: flex; align-items: center; cursor: pointer; color: white;">
+                        <input type="checkbox" name="loser" value="${p.id}" style="width: auto; margin-right: 10px;">
+                        ${p.name}
+                    </label>
+                `;
+                losersList.appendChild(div);
+
+                // Manage List Item
+                const item = document.createElement('div');
+                item.className = 'flex-between';
+                item.style.padding = '0.75rem';
+                item.style.borderBottom = '1px solid var(--border)';
+                item.innerHTML = `
+                    <span>${p.name} (${formatRating(p.rating)})</span>
+                    <button class="delete-btn" data-id="${p.id}" style="width: auto; padding: 0.5rem 1rem; background: var(--danger); font-size: 0.8rem;">Elimina</button>
+                `;
+                manageList.appendChild(item);
+            });
+
+            // Attach Delete Listeners
+            document.querySelectorAll('.delete-btn').forEach(btn => {
+                btn.addEventListener('click', async (e) => {
+                    const id = e.target.getAttribute('data-id');
+                    if (confirm('Sei sicuro di voler eliminare questo giocatore? Questa azione è irreversibile e rimuoverà anche le sue vittorie.')) {
+                        try {
+                            await fetchAPI(`/player/${id}`, {
+                                method: 'DELETE',
+                                headers: { 'X-Admin-Key': getAdminKey() }
+                            });
+                            showToast('Giocatore eliminato');
+                            initDashboard();
+                        } catch (err) {
+                            showToast(err.message, 'error');
+                        }
+                    }
+                });
+            });
+        }
+
+        document.addEventListener('DOMContentLoaded', () => {
+            const key = getAdminKey();
+            if (key) {
+                document.getElementById('login-section').classList.add('hidden');
+                document.getElementById('dashboard-section').classList.remove('hidden');
+                initDashboard();
+            }
+
+            // Defaults
+            document.getElementById('match-date').valueAsDate = new Date();
+
+            // Login Handler
+            document.getElementById('login-form').addEventListener('submit', (e) => {
+                e.preventDefault();
+                const keyInput = document.getElementById('admin-key').value;
+                if (keyInput) {
+                    localStorage.setItem('adminKey', keyInput);
+                    window.location.reload();
+                }
+            });
+
+            // Logout
+            document.getElementById('logout-btn').addEventListener('click', () => {
+                localStorage.removeItem('adminKey');
+                window.location.reload();
+            });
+
+            // Create Player
+            document.getElementById('create-player-form').addEventListener('submit', async (e) => {
+                e.preventDefault();
+                const name = document.getElementById('player-name').value;
+                try {
+                    await fetchAPI('/player', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'X-Admin-Key': getAdminKey()
+                        },
+                        body: JSON.stringify({ name })
+                    });
+                    showToast('Giocatore creato!');
+                    document.getElementById('player-name').value = '';
+                    initDashboard(); // Refresh lists
+                } catch (err) {
+                    showToast(err.message, 'error');
+                }
+            });
+
+            // Record Match
+            document.getElementById('record-match-form').addEventListener('submit', async (e) => {
+                e.preventDefault();
+                const date = document.getElementById('match-date').value;
+                const winnerId = document.getElementById('winner-select').value;
+
+                // Get checked losers
+                const loserCheckboxes = document.querySelectorAll('input[name="loser"]:checked');
+                const loserIds = Array.from(loserCheckboxes).map(cb => cb.value);
+
+                if (!winnerId || loserIds.length === 0) {
+                    showToast('Seleziona un vincitore e almeno uno sconfitto.', 'error');
+                    return;
+                }
+
+                if (loserIds.includes(winnerId)) {
+                    showToast('Il vincitore non può essere tra gli sconfitti.', 'error');
+                    return;
+                }
+
+                try {
+                    await fetchAPI('/match', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'X-Admin-Key': getAdminKey()
+                        },
+                        body: JSON.stringify({
+                            date: new Date(date).toISOString(),
+                            winner_id: winnerId,
+                            loser_ids: loserIds
+                        })
+                    });
+
+                    showToast('Partita registrata con successo!');
+                    // Reset form
+                    document.getElementById('winner-select').value = '';
+                    loserCheckboxes.forEach(cb => cb.checked = false);
+                    initDashboard(); // Refresh
+                } catch (err) {
+                    showToast(err.message, 'error');
+                }
+            });
+
+            // Settings
+            document.getElementById('settings-form').addEventListener('submit', async (e) => {
+                e.preventDefault();
+                const k = document.getElementById('k-factor').value;
+                try {
+                    await fetchAPI('/settings', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'X-Admin-Key': getAdminKey()
+                        },
+                        body: JSON.stringify({ k_factor: k })
+                    });
+
+                    showToast('K-Factor aggiornato!');
+                    document.getElementById('current-k').innerText = k;
+                } catch (err) {
+                    showToast(err.message, 'error');
+                }
+            });
+        });
+    </script>
+</body>
+
+</html>

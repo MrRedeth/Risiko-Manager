@@ -1,0 +1,177 @@
+<!DOCTYPE html>
+<html lang="it">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dettagli Giocatore - Risiko Ranking</title>
+    <link rel="stylesheet" href="style.css">
+    <script src="app.js"></script>
+    <style>
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+            gap: 1rem;
+            margin-bottom: 2rem;
+        }
+
+        .stat-card {
+            background: var(--card-bg);
+            padding: 1.5rem;
+            border-radius: var(--radius);
+            text-align: center;
+            border: 1px solid var(--border-color);
+        }
+
+        .stat-value {
+            font-size: 1.8rem;
+            font-weight: bold;
+            color: var(--text-primary);
+            margin: 0.5rem 0;
+            font-feature-settings: "tnum";
+            font-variant-numeric: tabular-nums;
+        }
+
+        .stat-label {
+            font-size: 0.85rem;
+            color: var(--text-secondary);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .streak-win { color: var(--success); }
+        .streak-loss { color: var(--danger); }
+    </style>
+</head>
+
+<body>
+    <div class="container">
+        <header>
+            <h1 id="player-name">...</h1>
+            <p class="subtitle" id="player-stats">Rating: ...</p>
+        </header>
+
+        <nav>
+            <a href="index.html">Classifica</a>
+            <a href="matches.html">Partite</a>
+            <a href="rules.html">Regolamento</a>
+            <a href="#" class="active">Giocatore</a>
+        </nav>
+
+        <div id="stats-container" class="stats-grid hidden">
+            <!-- Populated by JS -->
+        </div>
+
+        <div class="card">
+            <h3>Storico Partite</h3>
+            <div id="loading" class="loading">Caricamento...</div>
+            <div class="table-container">
+                <table id="history-table" class="hidden">
+                    <thead>
+                        <tr>
+                            <th>Data</th>
+                            <th>Esito</th>
+                            <th>Delta</th>
+                            <th>Rating Finale</th>
+                        </tr>
+                    </thead>
+                    <tbody id="history-body">
+                    </tbody>
+                </table>
+            </div>
+            <div id="empty-msg" class="hidden" style="text-align: center; padding: 1rem; color: var(--text-secondary);">
+                Nessuna partita giocata ancora.
+            </div>
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', async () => {
+            const params = new URLSearchParams(window.location.search);
+            const id = params.get('id');
+
+            if (!id) {
+                window.location.href = 'index.html';
+                return;
+            }
+
+            try {
+                const data = await fetchAPI(`/player/${id}`);
+                const { player, history, stats } = data; // Added stats here
+
+                document.getElementById('player-name').innerText = player.name;
+                document.getElementById('player-stats').innerText = `Rating: ${formatRating(player.rating)} • Partite: ${player.games_played}`;
+
+                const loading = document.getElementById('loading');
+                loading.classList.add('hidden');
+
+                // --- Render Stats ---
+                if (stats) {
+                    const statsContainer = document.getElementById('stats-container');
+                    statsContainer.classList.remove('hidden');
+                    
+                    let streakIcon = stats.streak_type === 'win' ? '🔥' : '❄️';
+                    let streakClass = stats.streak_type === 'win' ? 'streak-win' : 'streak-loss';
+                    if (stats.streak_count === 0) {
+                        streakIcon = '-'; 
+                        streakClass = '';
+                    }
+
+                    statsContainer.innerHTML = `
+                        <div class="stat-card">
+                            <div class="stat-label">Rank</div>
+                            <div class="stat-value">#${stats.rank}</div>
+                        </div>
+                        <div class="stat-card">
+                            <div class="stat-label">Vittorie</div>
+                            <div class="stat-value">${stats.wins} <span style="font-size:0.5em; color:var(--text-secondary)">(${stats.win_rate}%)</span></div>
+                        </div>
+                        <div class="stat-card">
+                            <div class="stat-label">Streak</div>
+                            <div class="stat-value ${streakClass}">${streakIcon} ${stats.streak_count}</div>
+                        </div>
+                        <div class="stat-card">
+                            <div class="stat-label">Max / Min</div>
+                            <div class="stat-value" style="font-size: 1.4rem;">${formatRating(stats.max_rating)} <span style="font-size:0.6em; color:var(--text-secondary)">/ ${formatRating(stats.min_rating)}</span></div>
+                        </div>
+                    `;
+                }
+
+
+                if (history.length === 0) {
+                    document.getElementById('empty-msg').classList.remove('hidden');
+                } else {
+                    const table = document.getElementById('history-table');
+                    const tbody = document.getElementById('history-body');
+                    table.classList.remove('hidden');
+
+                    history.forEach(match => {
+                        const tr = document.createElement('tr');
+                        const isWin = match.is_winner === 1;
+                        const deltaSign = match.rating_delta >= 0 ? '+' : '';
+                        const deltaClass = match.rating_delta >= 0 ? 'delta-pos' : 'delta-neg';
+
+                        tr.innerHTML = `
+                            <td>${formatDate(match.date)}</td>
+                            <td>
+                                <span style="background: ${isWin ? 'var(--success)' : 'rgba(255,255,255,0.1)'}; padding: 2px 8px; border-radius: 4px; font-size: 0.8em; color: white;">
+                                    ${isWin ? 'VITTORIA' : 'SCONFITTA'}
+                                </span>
+                            </td>
+                            <td class="rating-cell">
+                                <span class="${deltaClass}">${deltaSign}${match.rating_delta.toFixed(1)}</span>
+                            </td>
+                            <td class="rating-cell">${formatRating(match.rating_after)}</td>
+                        `;
+                        tbody.appendChild(tr);
+                    });
+                }
+
+            } catch (err) {
+                document.body.innerHTML = `<div class="container"><h3 style="color:var(--danger)">Errore: ${err.message}</h3><br><a href="index.html" style="color:var(--accent)">Torna alla Home</a></div>`;
+            }
+        });
+    </script>
+</body>
+
+</html>

@@ -1,0 +1,303 @@
+:root {
+    --bg-color: #0f172a;
+    --card-bg: rgba(30, 41, 59, 0.7);
+    --text-primary: #f8fafc;
+    --text-secondary: #94a3b8;
+    --accent: #38bdf8;
+    --accent-hover: #0ea5e9;
+    --border: rgba(148, 163, 184, 0.1);
+    --glass-border: 1px solid rgba(255, 255, 255, 0.05);
+    --font-family: 'Inter', system-ui, -apple-system, sans-serif;
+    --success: #22c55e;
+    --danger: #ef4444;
+}
+
+* {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+}
+
+body {
+    background-color: var(--bg-color);
+    color: var(--text-primary);
+    font-family: var(--font-family);
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 2rem 1rem;
+    overflow-x: hidden;
+}
+
+/* Background Gradients */
+body::before {
+    content: '';
+    position: fixed;
+    top: -20%;
+    left: -20%;
+    width: 60%;
+    height: 60%;
+    background: radial-gradient(circle, rgba(56, 189, 248, 0.15), transparent 70%);
+    z-index: -1;
+    pointer-events: none;
+}
+
+body::after {
+    content: '';
+    position: fixed;
+    bottom: -20%;
+    right: -20%;
+    width: 60%;
+    height: 60%;
+    background: radial-gradient(circle, rgba(139, 92, 246, 0.15), transparent 70%);
+    z-index: -1;
+    pointer-events: none;
+}
+
+/* Layout */
+.container {
+    width: 100%;
+    max-width: 800px;
+    z-index: 1;
+}
+
+/* Header */
+header {
+    margin-bottom: 2rem;
+    text-align: center;
+}
+
+h1 {
+    font-size: 2.5rem;
+    font-weight: 800;
+    letter-spacing: -0.05em;
+    background: linear-gradient(135deg, #fff 0%, #94a3b8 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    margin-bottom: 0.5rem;
+}
+
+.subtitle {
+    color: var(--text-secondary);
+    font-size: 1rem;
+}
+
+/* Navigation */
+nav {
+    display: flex;
+    justify-content: center;
+    gap: 1.5rem;
+    margin-bottom: 3rem;
+    padding: 1rem;
+    background: rgba(30, 41, 59, 0.4);
+    backdrop-filter: blur(12px);
+    border-radius: 999px;
+    border: var(--glass-border);
+}
+
+nav a {
+    color: var(--text-secondary);
+    text-decoration: none;
+    font-size: 0.9rem;
+    font-weight: 500;
+    transition: color 0.2s, transform 0.2s;
+}
+
+nav a:hover, nav a.active {
+    color: var(--accent);
+    transform: translateY(-1px);
+}
+
+/* Cards & Glassmorphism */
+.card {
+    background: var(--card-bg);
+    backdrop-filter: blur(16px);
+    -webkit-backdrop-filter: blur(16px);
+    border: var(--glass-border);
+    border-radius: 12px;
+    padding: 1.5rem;
+    margin-bottom: 1.5rem;
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+    transition: transform 0.2s;
+}
+
+/* Tables */
+.table-container {
+    overflow-x: auto;
+}
+
+table {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+th {
+    text-align: left;
+    padding: 1rem;
+    color: var(--text-secondary);
+    font-size: 0.8rem;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    border-bottom: 1px solid var(--border);
+}
+
+td {
+    padding: 1rem;
+    color: var(--text-primary);
+    border-bottom: 1px solid var(--border);
+}
+
+tr:last-child td {
+    border-bottom: none;
+}
+
+tr:hover td {
+    background: rgba(255, 255, 255, 0.02);
+}
+
+.rank-cell {
+    font-weight: 700;
+    color: var(--accent);
+    width: 50px;
+}
+
+.rating-cell {
+    font-family: 'SF Mono', 'Roboto Mono', monospace;
+    font-weight: 600;
+}
+
+.delta-pos {
+    color: var(--success);
+    font-size: 0.85em;
+    margin-left: 0.5rem;
+}
+
+.delta-neg {
+    color: var(--danger);
+    font-size: 0.85em;
+    margin-left: 0.5rem;
+}
+
+/* Forms */
+.form-group {
+    margin-bottom: 1.5rem;
+}
+
+label {
+    display: block;
+    margin-bottom: 0.5rem;
+    color: var(--text-secondary);
+    font-size: 0.9rem;
+}
+
+input, select {
+    width: 100%;
+    padding: 0.75rem;
+    background: rgba(15, 23, 42, 0.6);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    color: white;
+    font-size: 1rem;
+    transition: border-color 0.2s;
+}
+
+input:focus, select:focus {
+    outline: none;
+    border-color: var(--accent);
+}
+
+button {
+    width: 100%;
+    padding: 0.85rem;
+    background: var(--accent);
+    color: white;
+    border: none;
+    border-radius: 8px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background 0.2s, transform 0.1s;
+    font-size: 1rem;
+}
+
+button:hover {
+    background: var(--accent-hover);
+}
+
+button:active {
+    transform: scale(0.98);
+}
+
+/* Utilities */
+.hidden {
+    display: none;
+}
+
+.text-center { text-align: center; }
+.mt-4 { margin-top: 1rem; }
+.flex-between { display: flex; justify-content: space-between; align-items: center; }
+
+/* Spinner */
+.loading {
+    text-align: center;
+    padding: 2rem;
+    color: var(--text-secondary);
+    animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+}
+
+@keyframes pulse {
+    0%, 100% { opacity: 1; }
+    50% { opacity: .5; }
+}
+
+/* Mobile Responsiveness */
+@media (max-width: 600px) {
+    body {
+        padding: 1rem 0.5rem;
+    }
+
+    .container {
+        padding: 0;
+    }
+
+    h1 {
+        font-size: 1.8rem;
+    }
+
+    nav {
+        padding: 0.75rem;
+        gap: 0.5rem;
+        flex-wrap: wrap; 
+        border-radius: 1rem;
+        width: 100%;
+    }
+
+    nav a {
+        font-size: 0.8rem;
+        padding: 0.25rem 0.5rem;
+        background: rgba(255, 255, 255, 0.03);
+        border-radius: 6px;
+    }
+    
+    .card {
+        padding: 1rem;
+        border-radius: 0; /* Full width feel on mobile */
+        border-right: none;
+        border-left: none;
+    }
+
+    th, td {
+        padding: 0.75rem 0.5rem;
+        font-size: 0.9rem;
+    }
+    
+    .rank-cell {
+        width: 30px;
+    }
+    
+    /* Tweaks for form inputs on mobile */
+    input, select, button {
+        font-size: 16px; /* Prevents iOS zoom on focus */
+        padding: 0.85rem;
+    }
+}

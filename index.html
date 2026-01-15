@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html lang="it">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Risiko Ranking</title>
+    <link rel="stylesheet" href="style.css">
+    <script src="app.js"></script>
+</head>
+
+<body>
+    <div class="container">
+        <header>
+            <h1>Risiko Ranking</h1>
+            <p class="subtitle">Classifica Ufficiale</p>
+        </header>
+
+        <nav>
+            <a href="index.html" class="active">Classifica</a>
+            <a href="matches.html">Partite</a>
+            <a href="rules.html">Regolamento</a>
+            <a href="admin.html">Admin</a>
+        </nav>
+
+        <div class="card">
+            <div id="loading" class="loading">Caricamento...</div>
+            <div class="table-container fade-in">
+                <table id="leaderboard" class="hidden">
+                    <thead>
+                        <tr>
+                            <th>#</th>
+                            <th>Giocatore</th>
+                            <th>Partite</th>
+                            <th>Rating</th>
+                        </tr>
+                    </thead>
+                    <tbody id="leaderboard-body">
+                        <!-- Populated via JS -->
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', async () => {
+            try {
+                const players = await fetchAPI('/leaderboard');
+                const tbody = document.getElementById('leaderboard-body');
+                const loading = document.getElementById('loading');
+                const table = document.getElementById('leaderboard');
+
+                loading.classList.add('hidden');
+                table.classList.remove('hidden');
+
+                players.forEach((p, index) => {
+                    const tr = document.createElement('tr');
+                    tr.innerHTML = `
+                        <td class="rank-cell">${index + 1}</td>
+                        <td style="font-weight: 500">${p.name}</td>
+                        <td>${p.games_played}</td>
+                        <td class="rating-cell">
+                            ${formatRating(p.rating)}
+                            <a href="player.html?id=${p.id}" style="float: right; color: var(--text-secondary); text-decoration: none; font-size: 0.8em">↗</a>
+                        </td>
+                    `;
+                    tr.onclick = () => window.location.href = `player.html?id=${p.id}`;
+                    tr.style.cursor = 'pointer';
+                    tbody.appendChild(tr);
+                });
+            } catch (err) {
+                document.getElementById('loading').innerText = 'Errore caricamento: ' + err.message;
+            }
+        });
+    </script>
+</body>
+
+</html>
