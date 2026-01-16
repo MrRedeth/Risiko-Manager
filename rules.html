@@ -91,57 +91,59 @@
                 </div>
             </div>
 
-        </div>
-    </div>
 
-    <div class="faq-item">
-        <div class="faq-question">Perché il mio nome è in grigio / provvisorio?</div>
-        <div class="faq-answer">
-            Per garantire che la classifica sia equa e non dominata da chi ha giocato solo una o due partite fortunate,
-            utilizziamo un sistema di <strong>Rating Provvisorio</strong>.
-            <br><br>
-            Per entrare nella Classifica Ufficiale devi soddisfare questi requisiti di attività:
-            <ul>
-                <li>Aver giocato almeno <strong>5 partite</strong>.</li>
-                <li>Aver giocato almeno il <strong>20%</strong> delle partite del giocatore più attivo del torneo.</li>
-            </ul>
-            Tuttavia, esiste un "tetto massimo": una volta raggiunte le <strong>15 partite</strong> sei considerato un
-            veterano e entri in classifica indipendentemente da quanto hanno giocato gli altri.
-        </div>
-    </div>
 
-    <div class="faq-item">
-        <div class="faq-question">Posso guadagnare punti solo giocando tanto?</div>
-        <div class="faq-answer">
-            <strong>No.</strong> A differenza dei sistemi a punti cumulativi, qui puoi anche <em>perdere</em>
-            punti se giochi male. Giocare tanto senza vincere farà scendere il tuo punteggio. Il sistema premia
-            la <strong>percentuale di vittorie</strong> ponderata per la forza degli avversari.
-        </div>
-    </div>
-
-    <div class="faq-item">
-        <div class="faq-question">È possibile truccare la classifica?</div>
-        <div class="faq-answer">
-            Il sistema è deterministico. L'unico dato inserito dall'amministratore è "X ha vinto la partita del
-            giorno Y". Tutto il resto (i punti vinti/persi) è calcolato automaticamente da una formula
-            matematica fissa. Non ci sono favoritismi manuali.
-        </div>
-    </div>
-
-    <div class="faq-item">
-        <div class="faq-question">Formula Matematica</div>
-        <div class="faq-answer">
-            Per i più tecnici, ecco come funziona il calcolo:
-            <div class="math-block">
-                Delta = K * (RisultatoReale - RisultatoAtteso)<br>
-                RisultatoAtteso = 1 / (1 + 10 ^ ((RatingAvversario - TuoRating) / 400))
+            <div class="faq-item">
+                <div class="faq-question">Perché il mio nome è in grigio / provvisorio?</div>
+                <div class="faq-answer">
+                    Per garantire che la classifica sia equa e non dominata da chi ha giocato solo una o due partite
+                    fortunate,
+                    utilizziamo un sistema di <strong>Rating Provvisorio</strong>.
+                    <br><br>
+                    Per entrare nella Classifica Ufficiale devi soddisfare questi requisiti di attività:
+                    <ul>
+                        <li>Aver giocato almeno <strong>5 partite</strong>.</li>
+                        <li>Aver giocato almeno il <strong>20%</strong> delle partite del giocatore più attivo del
+                            torneo.</li>
+                    </ul>
+                    Tuttavia, esiste un "tetto massimo": una volta raggiunte le <strong>15 partite</strong> sei
+                    considerato un
+                    veterano e entri in classifica indipendentemente da quanto hanno giocato gli altri.
+                </div>
             </div>
-            Il fattore <strong>K</strong> determina la "velocità" con cui cambia la classifica. Attualmente è
-            impostato per garantire stabilità ma permettere recuperi.
-        </div>
-    </div>
 
-    </div>
+            <div class="faq-item">
+                <div class="faq-question">Posso guadagnare punti solo giocando tanto?</div>
+                <div class="faq-answer">
+                    <strong>No.</strong> A differenza dei sistemi a punti cumulativi, qui puoi anche <em>perdere</em>
+                    punti se giochi male. Giocare tanto senza vincere farà scendere il tuo punteggio. Il sistema premia
+                    la <strong>percentuale di vittorie</strong> ponderata per la forza degli avversari.
+                </div>
+            </div>
+
+            <div class="faq-item">
+                <div class="faq-question">È possibile truccare la classifica?</div>
+                <div class="faq-answer">
+                    Il sistema è deterministico. L'unico dato inserito dall'amministratore è "X ha vinto la partita del
+                    giorno Y". Tutto il resto (i punti vinti/persi) è calcolato automaticamente da una formula
+                    matematica fissa. Non ci sono favoritismi manuali.
+                </div>
+            </div>
+
+            <div class="faq-item">
+                <div class="faq-question">Formula Matematica</div>
+                <div class="faq-answer">
+                    Per i più tecnici, ecco come funziona il calcolo:
+                    <div class="math-block">
+                        Delta = K * (RisultatoReale - RisultatoAtteso)<br>
+                        RisultatoAtteso = 1 / (1 + 10 ^ ((RatingAvversario - TuoRating) / 400))
+                    </div>
+                    Il fattore <strong>K</strong> determina la "velocità" con cui cambia la classifica. Attualmente è
+                    impostato per garantire stabilità ma permettere recuperi.
+                </div>
+            </div>
+
+        </div>
     </div>
 </body>
 
